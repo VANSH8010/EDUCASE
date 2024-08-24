@@ -7,7 +7,7 @@ app.use(bodyParser.json());//req.body
 const Route = require ('./router');
 
 // Use your router for API routes
-app.use('', Route);
+app.use('/', Route);
 
 
 const PORT = process.env.PORT || 3000;

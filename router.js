@@ -51,7 +51,7 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
         const { latitude, longitude } = req.query;
 
         // Validate input
-        if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+        if (!latitude || !longitude ) {
             return res.status(400).json({ error: 'Invalid latitude or longitude' });
         }
         const userLat = parseFloat(latitude);
