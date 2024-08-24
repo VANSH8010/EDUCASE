@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
-app.use(express.json());
 require('dotenv').config();
-const router = require ('./router');
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());//req.body
+
+const Route = require ('./router');
 
 // Use your router for API routes
-app.use('/api', router);
+app.use('', Route);
 
 
 const PORT = process.env.PORT || 3000;

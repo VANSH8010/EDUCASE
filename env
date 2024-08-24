@@ -3,3 +3,4 @@ DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=Vansh@2003
 DB_NAME=schooldb
+DB_LIMIT= 10

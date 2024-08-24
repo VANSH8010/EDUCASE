@@ -3,23 +3,21 @@ const connection = require('./db');
 const router = express();
 
 // POST/api/addschool   
-router.post('/api/addschool', (req, res) => {
+router.post('/addschool', async (req, res) => {
     const { name, address, latitude, longitude } = req.body;
 
-    // VALIDATE INPUT
-    if (!name || !address || typeof latitude !== 'number' || typeof longitude !== 'number') {
+    // VALIDATE INPUT   
+    if (!name || !address || !latitude || !longitude) {
         return res.status(400).json({ error: 'Invalid input data' });
     }
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-        return res.status(400).json({ error: 'Latitude or Longitude out of range' });
+        return res.status(400).json({ error: 'latitude or longitude out of range' });
     }
     const query = 'INSERT INTO style (name, address, latitude, longitude) VALUES (?, ?, ?, ?)';
     const values = [name, address, latitude, longitude];
-    connection.query(query, values, (error, results) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
+    try {
+        const results = await connection.query(query, values);
+
         const payload = {
             schoolId: results.insertId,
             name,
@@ -29,7 +27,10 @@ router.post('/api/addschool', (req, res) => {
         };
 
         return res.status(201).json(payload);
-    });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 // This is a Haversine formula
@@ -44,35 +45,36 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in kilometers
 };
-// // GET/api/listschool
-router.get('/api/listschool', (req, res) => {
-    const { latitude, longitude } = req.query;
-    console.log(latitude, longitude);
 
-    // Validate input
-    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
-        return res.status(400).json({ error: 'Invalid latitude or longitude' });
-    }
-    const userLat = parseFloat(latitude);
-    const userLon = parseFloat(longitude);
+    // // GET/api/listschool
+    router.get('/listSchools', async (req, res) => {
+        const { latitude, longitude } = req.query;
 
-    const query = 'SELECT * FROM style';
+        // Validate input
+        if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+            return res.status(400).json({ error: 'Invalid latitude or longitude' });
+        }
+        const userLat = parseFloat(latitude);
+        const userLon = parseFloat(longitude);
 
-    connection.query(query, (error, results) => {
-        if (error) {
-            console.error(error);
+        try {
+            // Fetch all schools from the database
+            const [rows] = await connection.query('SELECT * FROM style');
+
+            // Calculate distance and add it to each school
+            const schoolsWithDistance = rows.map(school => {
+                const distance = haversineDistance(userLat, userLon, parseFloat(school.latitude), parseFloat(school.longitude));
+                return { ...school, distance };
+            });
+
+
+            // Sort by distance
+            schoolsWithDistance.sort((a, b) => a.distance - b.distance);
+
+            res.json(schoolsWithDistance);
+        } catch (err) {
+            console.error('Error fetching schools: ', err);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
-        // Calculate distance and add it to each school
-        const schoolsWithDistance = results.map(school => {
-            const distance = haversineDistance(userLat, userLon, school.latitude, school.longitude);
-            return { ...school, distance };
-        });
-
-        // Sort by distance
-        schoolsWithDistance.sort((a, b) => a.distance - b.distance);
-
-        res.json(schoolsWithDistance);
     });
-});
-module.exports = router;
+    module.exports = router;
