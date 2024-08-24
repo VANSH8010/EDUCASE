@@ -4,7 +4,9 @@ require('dotenv').config();
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());//req.body
 
+app.use(express.json());
 const Route = require ('./router');
+
 
 // Use your router for API routes
 app.use('/', Route);
