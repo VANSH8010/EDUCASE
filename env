@@ -1,7 +1,1 @@
 PORT=3000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=Vansh@2003
-DB_NAME=schooldb
-DB_LIMIT= 10
-DB_PORT=3306
