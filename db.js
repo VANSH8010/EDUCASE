@@ -3,12 +3,12 @@ require('dotenv').config();
 
 // Create a pool of a MySQL connection
 const connection = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'Vansh@2003',
-    database: 'schooldb',
-    connectionLimit :10,
-    port:  3306,
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'Vansh@2003',
+    database: process.env.DB_NAME || 'schooldb',
+    connectionLimit :process.env.DB_LIMIT || 10,
+    port: process.env.DB_PORT || 3306,
 
 }); 
 
